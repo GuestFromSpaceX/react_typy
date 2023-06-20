@@ -4,7 +4,7 @@ import logo from './media/logo.svg';
 import hero from './media/skeleton-hero.png';
 import enemy from './media/skeleton.png';
 import HP from './components/HP';
-import MainInput from './components/MainInput';
+import { MainInput, Round } from './components/MainInput';
 
 function App() {
 
@@ -37,7 +37,7 @@ function App() {
             </div>
           </div> 
           <div name='log' class="bg-yellow-300">
-                Раунд 1
+            <Round/>
           </div> 
           <div name='enemy' class="bg-[#ff7fff]/50 flex flex-col items-center">
             <div name='enemy-pic' class="bg-blue-100">
