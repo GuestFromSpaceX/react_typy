@@ -12,6 +12,9 @@ import MainInput from './components/MainInput';
 import Round from './components/Round';
 import Stopwatch from './components/Stopwatch';
 import PlayButton from './components/PlayButton';
+import StatsButton from './components/StatsButton';
+import LogInButton from './components/LogInButton';
+import KeyboardOption from './components/KeyboardMenu';
 
 import words from './words/words'
 
@@ -149,20 +152,20 @@ function App() {
         <div name='logo' className="w-1/3">
             <img src={logo} alt='Логотип'/>
         </div>
-        <div name='play-menu-button' className="w-1/6">
+        <div name='play-menu-button' className="w-1/5">
             <PlayButton
 
             />
         </div>
-        <div name='stats-menu-button' className="w-1/6 bg-[#ff5fff]/50">
-            <button className="">
-              Player Stats
-              <img className="" src={logo} alt='Логотип'/>
+        <div name='stats-menu-button' className="w-1/5">
+              <StatsButton
 
-            </button>
+              />
         </div>
-        <div name='log-in-button' className="bg-[#ff3fff]/50">
-            <button className="">Log in</button>
+        <div name='log-in-button' className="w-1/10">
+          <LogInButton
+
+          />
         </div>       
       </header>
 
@@ -219,8 +222,10 @@ function App() {
             handleInputChange={handleInputChange}
           />
         </div>
-        <div name='main-keyboard' className="bg-green-200">
-          КЛАВИАТУРА
+        <div name='main-keyboard' className="bg-black text-white">
+          <KeyboardOption
+          
+          />
         </div>    
       </main>
 
