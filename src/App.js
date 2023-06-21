@@ -61,9 +61,15 @@ function App() {
     } 
   }
 
+//номер противника и его же уровень
+  const [enemyNumber, setEnemyNumber] = useState(1)
+
+//аттака противника
+  const [enemyAttak, setEnemyAttak] = useState(enemyNumber*0.3)
+  
 //секунды
   const [seconds, setSeconds] = useState(-3);
-
+  
 //секундомер с какой-то частью размонтироватия
 //НЕ ЗАКИДЫВАЕТ В СЕБЯ enemyAttak ПОСЛЕ ОБНОВЛЕНИЯ ЗНАЧЕНИЯ
   useEffect(() => {
@@ -101,11 +107,11 @@ function App() {
   }
 
   
-//номер противника и его же уровень
-  const [enemyNumber, setEnemyNumber] = useState(1)
 
-//аттака противника
-  const [enemyAttak, setEnemyAttak] = useState(enemyNumber*0.3)
+
+//const [en, seten] = useState({sem: 1, sam: 2})
+//en.sem бу равно 1
+
 
 //HP героя
   const [heroMaxCount, setHeroMaxCount] = useState(10)
@@ -126,6 +132,7 @@ function App() {
     
       // Форматирование значения цвета в формате "#rrggbb"
       const color = `#${red.toString(16)}${green.toString(16)}${blue.toString(16)}`;
+
     
       return color;
     }
@@ -198,7 +205,7 @@ function App() {
             />
           </div> 
           <div name='enemy' className="bg-[#ff7fff]/50 flex flex-col items-center">
-            <div name='enemy-pic' className={`bg-[${randomColor}]`}>
+            <div name='enemy-pic' className={'bg-['+randomColor+']'} style={{backgroundColor:randomColor}}>
               <img src={enemy} alt='Изображение противника'/>
             </div>
             <div name='enemy-stats' className="bg-red-400">
