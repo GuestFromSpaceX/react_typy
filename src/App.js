@@ -4,15 +4,16 @@ import './styles/App.css';
 import logo from './media/logo.svg';
 import hero from './media/skeleton-hero.png';
 import enemy from './media/skeleton.png';
+import stone from './media/stones.jpg';
 
 import EnemyHP from './components/EnemyHP';
 import HeroHP from './components/HeroHP';
 import MainInput from './components/MainInput';
 import Round from './components/Round';
 import Stopwatch from './components/Stopwatch';
+import PlayButton from './components/PlayButton';
 
 import words from './words/words'
-import PlayButton from './components/PlayButton';
 
 function App() {
 
@@ -58,7 +59,7 @@ function App() {
   }
 
 //секунды
-  const [seconds, setSeconds] = useState(0);
+  const [seconds, setSeconds] = useState(-3);
 
 //секундомер с какой-то частью размонтироватия
 //НЕ ЗАКИДЫВАЕТ В СЕБЯ enemyAttak ПОСЛЕ ОБНОВЛЕНИЯ ЗНАЧЕНИЯ
@@ -73,7 +74,7 @@ function App() {
       });
   
       // Каждые 10 секунд наносится удар по Герою
-      if (currentSeconds % 10 === 0) {
+      if (currentSeconds % 10 === 0 && currentSeconds !== 0) {
         setHeroCount((prevHeroCount) => prevHeroCount - enemyAttak);
       }
 
@@ -139,29 +140,33 @@ function App() {
 
   
   
- 
+  //<header className="bg-[#998414]
 
   return (
-    <div className="App">
+    <div className="bg-black">
 
-      <header className="bg-[#998414] flex flex-row flex-wrap justify-around items-center">
-        <div name='logo' className="">
+      <header className="m-5 bg-stone-bg flex flex-row justify-around items-center">
+        <div name='logo' className="w-1/3">
             <img src={logo} alt='Логотип'/>
         </div>
-        <div name='play-menu-button' className="">
+        <div name='play-menu-button' className="w-1/6">
             <PlayButton
 
             />
         </div>
-        <div name='stats-menu-button' className="bg-[#ff5fff]/50">
-            <button className="">Player Stats</button>
+        <div name='stats-menu-button' className="w-1/6 bg-[#ff5fff]/50">
+            <button className="">
+              Player Stats
+              <img className="" src={logo} alt='Логотип'/>
+
+            </button>
         </div>
         <div name='log-in-button' className="bg-[#ff3fff]/50">
             <button className="">Log in</button>
         </div>       
       </header>
 
-      <main className="bg-[#ff1fff]/50 flex flex-col items-center">
+      <main className="p-3 m-5 bg-metal-stone flex flex-col items-center">
         <div name='top-main' className="bg-[#ff2fff]/50 flex flex-row justify-center">
           <div name='player' className="bg-[#ff3fff]/50 flex flex-col items-center">
             <div name='player-pic' className="bg-red-100">
@@ -177,7 +182,7 @@ function App() {
               />
             </div>
           </div> 
-          <div name='log' className="bg-yellow-300 flex flex-col justify-end items-center">
+          <div name='log' className="bg-fight text-white flex flex-col justify-end items-center">
             <Round 
               countRound={countRound} 
               ranWord={ranWord} 
@@ -190,7 +195,7 @@ function App() {
             />
           </div> 
           <div name='enemy' className="bg-[#ff7fff]/50 flex flex-col items-center">
-            <div name='enemy-pic' className={`bg-[`+randomColor+`]`}>
+            <div name='enemy-pic' className={`bg-[${randomColor}]`}>
               <img src={enemy} alt='Изображение противника'/>
             </div>
             <div name='enemy-stats' className="bg-red-400">
@@ -219,7 +224,7 @@ function App() {
         </div>    
       </main>
 
-      <footer className="bg-blue-200">
+      <footer className="m-5 bg-blue-200">
         Footer
       </footer>
     </div>

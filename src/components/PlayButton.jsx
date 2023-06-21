@@ -1,4 +1,10 @@
 import React, { useState } from "react";
+import butrpgplay from '../media/button-rpg-play.png';
+import butrpgfocusplay from '../media/button-rpg-focus-play.png';
+import butrpgpushplay from '../media/button-rpg-push-play.png';
+
+//<img className="hidden" src={butrpgfocusplay} alt='Кнопка плей при наведении' />
+//<img className="hidden" src={butrpgpushplay} alt='Кнопка плей при нажатии' />
 
 function PlayButton() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -9,11 +15,14 @@ function PlayButton() {
 
   return (
     <div>
-      <button className="bg-[#ff6fff]/50" onClick={toggleMenu}>Play</button>
+      <button className="flex justify-center" onClick={toggleMenu}>
+        <img className="" src={butrpgplay} alt='Кнопка плей'/>
+         
+      </button>
       {isMenuOpen && (
-        <div className="text-white flex flex-col">
-          <button className="text-white bg-[#555555]/50">- Новичек</button>
-          <button className="bg-green-600">- Опытный</button>
+        <div className="text-white flex flex-col justify-start items-start">
+          <button className="text-white bg-green-300">- Новичек</button>
+          <button name='newSandBoxGame' className="bg-green-400">- Опытный (new sand box game)</button>
         </div>
       )}
     </div>
