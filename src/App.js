@@ -12,28 +12,32 @@ import Round from './components/Round';
 import Stopwatch from './components/Stopwatch';
 
 import words from './words/words'
+import PlayButton from './components/PlayButton';
 
 function App() {
 
-  //значение инпута
+//значение инпута
   const [inputValue, setInputValue] = useState()
-  //передача набранного текста в значение инпута
+//передача набранного текста в значение инпута
   const handleInputChange = (event) => {
     setInputValue(event.target.value);
   }
 
-  //номер раунда
+//номер раунда
   const [countRound, setCountRound] = useState(1)
 
-  //слово, которое нужно ввести
+//слово, которое нужно ввести
   const [ranWord, setRanWord] = useState(words[Math.floor(Math.random() * words.length)])
 
-  //удар героя
-  //событие, когда я ввел нужно слово и Enter
+//удар героя
+//событие, когда я ввел нужно слово и Enter
   const inputEnterPress = (event) => {
+    //КАК СДЕЛАТЬ ТАК ЧТОБЫ ЭТО ПРОИСХОДИЛО СВОЕВРЕМЕННО
     if (enemyCount <= 0) {
       //меняется номер противника
       setEnemyNumber(enemyNumber + 1)
+      //увеличивается урон противника
+      setEnemyAttak(enemyAttak + enemyNumber*0.3)
       //меняется имя противника
       //сбрасывается таймер
       setSeconds(seconds => 0)
@@ -41,7 +45,8 @@ function App() {
       //смена изображения противника
       setRandomColor(getRandomColor())
       //смена хп противника
-      setEnemyCount(enemyCount + 10);
+      setEnemyMaxCount(enemyMaxCount + (enemyNumber*0.3))
+      setEnemyCount(enemyMaxCount);
     }
     
     if ((event.key === 'Enter') && (inputValue == ranWord)) {
@@ -52,10 +57,11 @@ function App() {
     } 
   }
 
-  //секунды
+//секунды
   const [seconds, setSeconds] = useState(0);
 
-  //секундомер с какой-то частью размонтироватия
+//секундомер с какой-то частью размонтироватия
+//НЕ ЗАКИДЫВАЕТ В СЕБЯ enemyAttak ПОСЛЕ ОБНОВЛЕНИЯ ЗНАЧЕНИЯ
   useEffect(() => {
     let currentSeconds = 0; // Промежуточная переменная для хранения текущего значения seconds
 
@@ -68,20 +74,21 @@ function App() {
   
       // Каждые 10 секунд наносится удар по Герою
       if (currentSeconds % 10 === 0) {
-        setHeroCount((prevHeroCount) => prevHeroCount - 3);
+        setHeroCount((prevHeroCount) => prevHeroCount - enemyAttak);
       }
 
     }, 1000);
 
     // Очистка интервала при размонтировании компонента
-    //return () => clearInterval(interval);
+    return () => clearInterval(interval);
   }, []);
 
 
 
 
-  //HP противника (должно быть противника)
-  const [enemyCount, setEnemyCount] = useState(10)
+//HP противника (должно быть противника)
+  const [enemyCount, setEnemyCount] = useState(1)
+  const [enemyMaxCount, setEnemyMaxCount] = useState(1)
   function increment() {
       setEnemyCount(enemyCount + 1)
   }
@@ -89,11 +96,16 @@ function App() {
       setEnemyCount(enemyCount - 1)
   }
 
-  //номер противника
+  
+//номер противника и его же уровень
   const [enemyNumber, setEnemyNumber] = useState(1)
 
-  //HP героя
-  const [heroCount, setHeroCount] = useState(100)
+//аттака противника
+  const [enemyAttak, setEnemyAttak] = useState(enemyNumber*0.3)
+
+//HP героя
+  const [heroMaxCount, setHeroMaxCount] = useState(10)
+  const [heroCount, setHeroCount] = useState(heroMaxCount)
   function incrementHero() {
       setHeroCount(heroCount + 1)
   }
@@ -101,6 +113,7 @@ function App() {
       setHeroCount(heroCount - 1)
   }
 
+//Генератор цвета противника
   function getRandomColor() {
       // Генерация случайного значения от 0 до 255 для каждой компоненты RGB
       const red = Math.floor(Math.random() * 256);
@@ -116,7 +129,7 @@ function App() {
      // В компоненте
   const [randomColor, setRandomColor] = useState(getRandomColor());
   
-  // Вывод значений в консоль разработчика
+// Вывод значений в консоль разработчика
   //console.log("Value of ranWord:", ranWord);
   //console.log("Value of enemyCount:", enemyCount);
   //console.log("Value of inputValue:", inputValue);
@@ -135,8 +148,10 @@ function App() {
         <div name='logo' className="">
             <img src={logo} alt='Логотип'/>
         </div>
-        <div name='play-menu-button' className="bg-[#ff6fff]/50">
-            <button className="">Play</button>
+        <div name='play-menu-button' className="">
+            <PlayButton
+
+            />
         </div>
         <div name='stats-menu-button' className="bg-[#ff5fff]/50">
             <button className="">Player Stats</button>
@@ -155,13 +170,14 @@ function App() {
             <div name='player-stats' className="bg-red-200">
               <HeroHP
                 heroCount={heroCount}
+                heroMaxCount={heroMaxCount}
                 incrementHero={incrementHero}
                 decrementHero={decrementHero}
                 inputEnterPress={inputEnterPress}
               />
             </div>
           </div> 
-          <div name='log' className="bg-yellow-300">
+          <div name='log' className="bg-yellow-300 flex flex-col justify-end items-center">
             <Round 
               countRound={countRound} 
               ranWord={ranWord} 
@@ -179,10 +195,13 @@ function App() {
             </div>
             <div name='enemy-stats' className="bg-red-400">
               <EnemyHP 
-                enemyCount={enemyCount}  
+                enemyCount={enemyCount}
+                enemyMaxCount={enemyMaxCount}  
                 increment={increment} 
                 decrement={decrement} 
                 inputEnterPress={inputEnterPress}
+                enemyNumber={enemyNumber}
+                enemyAttak={enemyAttak}
               />
             </div>
           </div>     
