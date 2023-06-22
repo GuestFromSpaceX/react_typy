@@ -20,6 +20,15 @@ import words from './words/words'
 
 function App() {
 
+//конец игры переключатель
+const [showEndGame, setShowEndGame] = useState(true);
+const handleEndGame = () => {
+  setShowEndGame(true);
+};
+const handleEndGameOn = () => {
+  setShowEndGame(false);
+};
+
 //значение инпута
   const [inputValue, setInputValue] = useState()
 //передача набранного текста в значение инпута
@@ -33,125 +42,153 @@ function App() {
 //слово, которое нужно ввести
   const [ranWord, setRanWord] = useState(words[Math.floor(Math.random() * words.length)])
 
-//удар героя
-//событие, когда я ввел нужно слово и Enter
-  const inputEnterPress = (event) => {
-    //КАК СДЕЛАТЬ ТАК ЧТОБЫ ЭТО ПРОИСХОДИЛО СВОЕВРЕМЕННО
-    if (enemyCount <= 0) {
-      //меняется номер противника
-      setEnemyNumber(enemyNumber + 1)
-      //увеличивается урон противника
-      setEnemyAttak(enemyAttak + enemyNumber*0.3)
-      //меняется имя противника
-      //сбрасывается таймер
-      setSeconds(seconds => 0)
-      //смена бекграунда противника
-      //смена изображения противника
-      setRandomColor(getRandomColor())
-      //смена хп противника
-      setEnemyMaxCount(enemyMaxCount + (enemyNumber*0.3))
-      setEnemyCount(enemyMaxCount);
-    }
-    
-    if ((event.key === 'Enter') && (inputValue == ranWord)) {
-        setEnemyCount(enemyCount - 1);
-        setCountRound(countRound + 1);
-        setInputValue('');
-        setRanWord(words[Math.floor(Math.random() * words.length)])
-    } 
-  }
-
-//номер противника и его же уровень
+  
+  //номер противника и его же уровень
   const [enemyNumber, setEnemyNumber] = useState(1)
-
-//аттака противника
+  
+  //аттака противника
   const [enemyAttak, setEnemyAttak] = useState(enemyNumber*0.3)
   
-//секунды
+  //секунды
   const [seconds, setSeconds] = useState(-3);
   
-//секундомер с какой-то частью размонтироватия
-//НЕ ЗАКИДЫВАЕТ В СЕБЯ enemyAttak ПОСЛЕ ОБНОВЛЕНИЯ ЗНАЧЕНИЯ
-  useEffect(() => {
-    let currentSeconds = 0; // Промежуточная переменная для хранения текущего значения seconds
-
-    // Интервал для увеличения счетчика каждую секунду
-    const interval = setInterval(() => {
-      setSeconds((prevSeconds) => {
-        currentSeconds = prevSeconds + 1; // Обновление значения currentSeconds
-        return currentSeconds;
-      });
   
-      // Каждые 10 секунд наносится удар по Герою
-      if (currentSeconds % 10 === 0 && currentSeconds !== 0) {
-        setHeroCount((prevHeroCount) => prevHeroCount - enemyAttak);
-      }
-
-    }, 1000);
-
-    // Очистка интервала при размонтировании компонента
-    return () => clearInterval(interval);
-  }, []);
-
-
-
-
-//HP противника (должно быть противника)
+  
+  
+  
+  //HP противника (должно быть противника)
   const [enemyCount, setEnemyCount] = useState(1)
   const [enemyMaxCount, setEnemyMaxCount] = useState(1)
   function increment() {
-      setEnemyCount(enemyCount + 1)
+    setEnemyCount(enemyCount + 1)
   }
   function decrement() {
-      setEnemyCount(enemyCount - 1)
+    setEnemyCount(enemyCount - 1)
   }
-
   
-
-
-//const [en, seten] = useState({sem: 1, sam: 2})
-//en.sem бу равно 1
-
-
-//HP героя
-  const [heroMaxCount, setHeroMaxCount] = useState(10)
+  
+  
+  
+  //const [en, seten] = useState({sem: 1, sam: 2})
+  //en.sem бу равно 1
+  
+  
+  //HP героя
+  const [heroMaxCount, setHeroMaxCount] = useState(5)
   const [heroCount, setHeroCount] = useState(heroMaxCount)
   function incrementHero() {
-      setHeroCount(heroCount + 1)
+    setHeroCount(heroCount + 1)
   }
   function decrementHero() {
-      setHeroCount(heroCount - 1)
+    setHeroCount(heroCount - 1)
   }
-
-//Генератор цвета противника
-  function getRandomColor() {
-      // Генерация случайного значения от 0 до 255 для каждой компоненты RGB
-      const red = Math.floor(Math.random() * 256);
-      const green = Math.floor(Math.random() * 256);
-      const blue = Math.floor(Math.random() * 256);
+  
+  //удар героя
+  //событие, когда я ввел нужно слово и Enter
+  const inputEnterPress = (event) => {
     
-      // Форматирование значения цвета в формате "#rrggbb"
-      const color = `#${red.toString(16)}${green.toString(16)}${blue.toString(16)}`;
-
+    if ((inputValue == ranWord)) {
+      setEnemyCount(prevEnemyCount => prevEnemyCount - 1);
+      setCountRound(prevCountRound => prevCountRound + 1);
+      setInputValue('');
+      setRanWord(words[Math.floor(Math.random() * words.length)])
+      if ((enemyCount - 1) <= 0) {
+        //меняется номер противника
+        setEnemyNumber(enemyNumber + 1)
+        //увеличивается урон противника
+        setEnemyAttak(prevEnemyAttak => prevEnemyAttak + enemyNumber*0.3)
+        //меняется имя противника
+        //сбрасывается таймер
+        setSeconds(seconds => 0)
+        //смена бекграунда противника
+        setRandomColor(getRandomColor())
+        //смена изображения противника
+        //смена хп противника
+        setEnemyMaxCount(enemyMaxCount + (enemyNumber*0.3))
+        setEnemyCount(enemyMaxCount + (enemyNumber*0.3));
+      }
+    } 
+  }
+  
+  const [isEffectRunning, setIsEffectRunning] = useState(false);
+  const handleEffectRunningOn = () => {
+    setIsEffectRunning((prevValue) => !prevValue);
+    setHeroCount(heroMaxCount);
+    setSeconds(-3);
+    setEnemyNumber(1);
+    setEnemyAttak(enemyNumber*0.3);
+    setEnemyMaxCount(1);
+    setEnemyCount(enemyMaxCount);
+    setCountRound(1);
+  };
+  
+  //секундомер с какой-то частью размонтироватия
+  useEffect(() => {
     
-      return color;
+    let currentSeconds = 0; // Промежуточная переменная для хранения текущего значения seconds
+    
+    if (isEffectRunning) {
+      // Интервал для увеличения счетчика каждую секунду
+      const interval = setInterval(() => {
+        setSeconds((prevSeconds) => {
+          currentSeconds = prevSeconds + 1; // Обновление значения currentSeconds
+          return currentSeconds;
+        });
+          
+        // Каждые 10 секунд наносится удар по Герою
+        if (currentSeconds % 10 === 0 && currentSeconds !== 0) {
+          if (heroCount - enemyAttak <= 0) {
+            setShowEndGame(true);
+            setIsEffectRunning(false);
+          } else {
+            setHeroCount((prevHeroCount) => prevHeroCount - enemyAttak);
+          }
+        }
+        
+      }, 1000);
+      
+      // Очистка интервала при размонтировании компонента
+      return () => clearInterval(interval);
     }
+  }, [enemyAttak, heroCount, heroMaxCount, isEffectRunning]);
 
-     // В компоненте
+
+  //Генератор цвета противника
+  function getRandomColor() {
+    // Генерация случайного значения от 0 до 255 для каждой компоненты RGB
+    const red = Math.floor(Math.random() * 256);
+    const green = Math.floor(Math.random() * 256);
+    const blue = Math.floor(Math.random() * 256);
+    
+    // Форматирование значения цвета в формате "#rrggbb"
+    let color = `#${red.toString(16)}${green.toString(16)}${blue.toString(16)}`;
+    
+    if (color.length !== 7) {
+      color = color + "f";
+    }
+    
+    return color;
+  }
+  
+  // В компоненте
   const [randomColor, setRandomColor] = useState(getRandomColor());
   
-// Вывод значений в консоль разработчика
+  // Вывод значений в консоль разработчика
+  console.log("______________________________");
   //console.log("Value of ranWord:", ranWord);
-  //console.log("Value of enemyCount:", enemyCount);
+  console.log("EnemyHP:", enemyCount);
+  console.log("Enemy Max HP:", enemyMaxCount);
+  console.log("Enemy ATK:", enemyAttak);
+  console.log("End Game:", showEndGame);
   //console.log("Value of inputValue:", inputValue);
   console.log("Seconds:", seconds);
   console.log("HeroHP:", heroCount);
-  console.log("EnemyColor:", randomColor);
-
+  //console.log("EnemyColor:", randomColor, typeof randomColor);
+  
   
   
   //<header className="bg-[#998414]
-
+  
   return (
     <div className="bg-black">
 
@@ -160,14 +197,16 @@ function App() {
             <img src={logo} alt='Логотип'/>
         </div>
         <div name='play-menu-button' className="w-1/5">
-            <PlayButton
-
-            />
+          <PlayButton
+            handleEndGame={handleEndGame}
+            handleEndGameOn={handleEndGameOn}
+            handleEffectRunningOn={handleEffectRunningOn}
+          />
         </div>
         <div name='stats-menu-button' className="w-1/5">
-              <StatsButton
+          <StatsButton
 
-              />
+          />
         </div>
         <div name='log-in-button' className="w-1/10">
           <LogInButton
@@ -177,63 +216,72 @@ function App() {
       </header>
 
       <main className="p-3 m-5 bg-metal-stone flex flex-col items-center">
-        <div name='top-main' className="bg-[#ff2fff]/50 flex flex-row justify-center">
-          <div name='player' className="bg-[#ff3fff]/50 flex flex-col items-center">
-            <div name='player-pic' className="bg-red-100">
-              <img src={hero} alt='Изображение игрока'/>
-            </div>
-            <div name='player-stats' className="bg-red-200">
-              <HeroHP
-                heroCount={heroCount}
-                heroMaxCount={heroMaxCount}
-                incrementHero={incrementHero}
-                decrementHero={decrementHero}
-                inputEnterPress={inputEnterPress}
-              />
-            </div>
-          </div> 
-          <div name='log' className="bg-fight text-white flex flex-col justify-end items-center">
-            <Round 
-              countRound={countRound} 
-              ranWord={ranWord} 
-              inputEnterPress={inputEnterPress}
-              enemyNumber={enemyNumber}
-            />
-            <Stopwatch 
-              seconds={seconds}
-              setSeconds={setSeconds}  
-            />
-          </div> 
-          <div name='enemy' className="bg-[#ff7fff]/50 flex flex-col items-center">
-            <div name='enemy-pic' className={'bg-['+randomColor+']'} style={{backgroundColor:randomColor}}>
-              <img src={enemy} alt='Изображение противника'/>
-            </div>
-            <div name='enemy-stats' className="bg-red-400">
-              <EnemyHP 
-                enemyCount={enemyCount}
-                enemyMaxCount={enemyMaxCount}  
-                increment={increment} 
-                decrement={decrement} 
+        {showEndGame ? (
+        <p>End of the Game</p>
+        ) : (
+        <>
+          <div name='top-main' className="bg-[#ff2fff]/50 flex flex-row justify-center">
+            <div name='player' className="bg-[#ff3fff]/50 flex flex-col items-center">
+              <div name='player-pic' className="bg-red-100">
+                <img src={hero} alt='Изображение игрока'/>
+              </div>
+              <div name='player-stats' className="bg-red-200">
+                <HeroHP
+                  heroCount={heroCount}
+                  heroMaxCount={heroMaxCount}
+                  incrementHero={incrementHero}
+                  decrementHero={decrementHero}
+                  inputEnterPress={inputEnterPress}
+                />
+              </div>
+            </div> 
+            <div name='log' className="bg-fight text-white flex flex-col justify-end items-center">
+              <Round 
+                countRound={countRound} 
+                ranWord={ranWord} 
                 inputEnterPress={inputEnterPress}
                 enemyNumber={enemyNumber}
-                enemyAttak={enemyAttak}
               />
-            </div>
-          </div>     
-        </div>
-        <div name='main-input-block' className="bg-green-100">
-          <MainInput 
-            ranWord={ranWord} 
-            inputEnterPress={inputEnterPress}
-            inputValue={inputValue}
-            handleInputChange={handleInputChange}
-          />
-        </div>
-        <div name='main-keyboard' className="bg-black text-white">
-          <KeyboardOption
-          
-          />
-        </div>    
+              <Stopwatch 
+                seconds={seconds}
+                setSeconds={setSeconds}  
+              />
+            </div> 
+            <div name='enemy' className="bg-[#ff7fff]/50 flex flex-col items-center">
+              <div 
+                name='enemy-pic' 
+                className='' 
+                style={{backgroundColor:randomColor}}>
+                <img src={enemy} alt='Изображение противника'/>
+              </div>
+              <div name='enemy-stats' className="bg-red-400">
+                <EnemyHP 
+                  enemyCount={enemyCount}
+                  enemyMaxCount={enemyMaxCount}  
+                  increment={increment} 
+                  decrement={decrement} 
+                  inputEnterPress={inputEnterPress}
+                  enemyNumber={enemyNumber}
+                  enemyAttak={enemyAttak}
+                />
+              </div>
+            </div>     
+          </div>
+          <div name='main-input-block' className="bg-green-100">
+            <MainInput 
+              ranWord={ranWord} 
+              inputEnterPress={inputEnterPress}
+              inputValue={inputValue}
+              handleInputChange={handleInputChange}
+            />
+          </div>
+          <div name='main-keyboard' className="bg-black text-white">
+            <KeyboardOption
+            
+            />
+          </div>
+        </>
+        )}    
       </main>
 
       <footer className="m-5 bg-blue-200">
