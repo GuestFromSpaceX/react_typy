@@ -9,9 +9,9 @@ const MainInput = function ({
             <input 
                 className='' 
                 placeholder={`Введи "`+ranWord+`"`} 
-                onKeyPress={inputEnterPress}
                 value={inputValue}
                 onChange={handleInputChange} 
+                onKeyUp={inputEnterPress}
             />
         </>
     )

@@ -19,29 +19,25 @@ import KeyboardOption from './components/KeyboardMenu';
 import words from './words/words'
 
 function App() {
+  
+//Запись рекорда в локал сторедж
+  let localValue = localStorage.getItem('record');
 
 //конец игры переключатель
-const [showEndGame, setShowEndGame] = useState(true);
-const handleEndGame = () => {
-  setShowEndGame(true);
-};
-const handleEndGameOn = () => {
-  setShowEndGame(false);
-};
+  const [showEndGame, setShowEndGame] = useState(true);
+  const handleEndGame = () => {
+    setShowEndGame(true);
+  };
+  const handleEndGameOn = () => {
+    setShowEndGame(false);
+  };
 
-//значение инпута
-  const [inputValue, setInputValue] = useState()
-//передача набранного текста в значение инпута
-  const handleInputChange = (event) => {
-    setInputValue(event.target.value);
-  }
-
-//номер раунда
+  
+  //номер раунда
   const [countRound, setCountRound] = useState(1)
-
-//слово, которое нужно ввести
+  
+  //слово, которое нужно ввести
   const [ranWord, setRanWord] = useState(words[Math.floor(Math.random() * words.length)])
-
   
   //номер противника и его же уровень
   const [enemyNumber, setEnemyNumber] = useState(1)
@@ -83,28 +79,41 @@ const handleEndGameOn = () => {
     setHeroCount(heroCount - 1)
   }
   
-  //удар героя
-  //событие, когда я ввел нужно слово и Enter
+  //Рекорд героя
+  const [heroNewRecord, setHeroNewRecord] = useState(0)
+  
+  //значение инпута
+    const [inputValue, setInputValue] = useState()
+  //передача набранного текста в значение инпута
+    const handleInputChange = (event) => {
+      setInputValue(event.target.value);
+    }
+
+//удар героя
+  const [heroAttak, setHeroAttak] = useState(1)
+//событие, когда я ввел нужно слово
   const inputEnterPress = (event) => {
     
     if ((inputValue == ranWord)) {
-      setEnemyCount(prevEnemyCount => prevEnemyCount - 1);
+      setEnemyCount(prevEnemyCount => prevEnemyCount - heroAttak);
       setCountRound(prevCountRound => prevCountRound + 1);
       setInputValue('');
       setRanWord(words[Math.floor(Math.random() * words.length)])
-      if ((enemyCount - 1) <= 0) {
+      if ((enemyCount - heroAttak) <= 0) {
+        //очко в зачет героя
+        setHeroNewRecord(heroNewRecord + enemyNumber);
         //меняется номер противника
-        setEnemyNumber(enemyNumber + 1)
+        setEnemyNumber(enemyNumber + 1);
         //увеличивается урон противника
-        setEnemyAttak(prevEnemyAttak => prevEnemyAttak + enemyNumber*0.3)
+        setEnemyAttak(prevEnemyAttak => prevEnemyAttak + enemyNumber*0.3);
         //меняется имя противника
         //сбрасывается таймер
-        setSeconds(seconds => 0)
+        setSeconds(seconds => 0);
         //смена бекграунда противника
-        setRandomColor(getRandomColor())
+        setRandomColor(getRandomColor());
         //смена изображения противника
         //смена хп противника
-        setEnemyMaxCount(enemyMaxCount + (enemyNumber*0.3))
+        setEnemyMaxCount(enemyMaxCount + (enemyNumber*0.3));
         setEnemyCount(enemyMaxCount + (enemyNumber*0.3));
       }
     } 
@@ -113,6 +122,11 @@ const handleEndGameOn = () => {
   const [isEffectRunning, setIsEffectRunning] = useState(false);
   const handleEffectRunningOn = () => {
     setIsEffectRunning((prevValue) => !prevValue);
+    if (localStorage.getItem('record') === null) {
+      localStorage.setItem('record', heroNewRecord)
+    } else if (localStorage.getItem('record') < heroNewRecord) {
+      localStorage.setItem('record', heroNewRecord)
+    }
     setHeroCount(heroMaxCount);
     setSeconds(-3);
     setEnemyNumber(1);
@@ -120,6 +134,7 @@ const handleEndGameOn = () => {
     setEnemyMaxCount(1);
     setEnemyCount(enemyMaxCount);
     setCountRound(1);
+    setHeroNewRecord(0);
   };
   
   //секундомер с какой-то частью размонтироватия
@@ -139,7 +154,7 @@ const handleEndGameOn = () => {
         if (currentSeconds % 10 === 0 && currentSeconds !== 0) {
           if (heroCount - enemyAttak <= 0) {
             setShowEndGame(true);
-            setIsEffectRunning(false);
+            handleEffectRunningOn();
           } else {
             setHeroCount((prevHeroCount) => prevHeroCount - enemyAttak);
           }
@@ -173,14 +188,16 @@ const handleEndGameOn = () => {
   // В компоненте
   const [randomColor, setRandomColor] = useState(getRandomColor());
   
+
   // Вывод значений в консоль разработчика
   console.log("______________________________");
   //console.log("Value of ranWord:", ranWord);
+  console.log("localValue:", localValue);
   console.log("EnemyHP:", enemyCount);
   console.log("Enemy Max HP:", enemyMaxCount);
   console.log("Enemy ATK:", enemyAttak);
   console.log("End Game:", showEndGame);
-  //console.log("Value of inputValue:", inputValue);
+  console.log("Value of inputValue:", inputValue);
   console.log("Seconds:", seconds);
   console.log("HeroHP:", heroCount);
   //console.log("EnemyColor:", randomColor, typeof randomColor);
@@ -217,7 +234,12 @@ const handleEndGameOn = () => {
 
       <main className="p-3 m-5 bg-metal-stone flex flex-col items-center">
         {showEndGame ? (
-        <p>End of the Game</p>
+        <>
+          <p>End of the Game</p>
+          <p>Ваш лучший результат:</p>
+          <p>{localStorage.getItem('record')}</p>
+          <button>Добавить </button>
+        </>
         ) : (
         <>
           <div name='top-main' className="bg-[#ff2fff]/50 flex flex-row justify-center">
@@ -232,6 +254,7 @@ const handleEndGameOn = () => {
                   incrementHero={incrementHero}
                   decrementHero={decrementHero}
                   inputEnterPress={inputEnterPress}
+                  heroAttak={heroAttak}
                 />
               </div>
             </div> 
