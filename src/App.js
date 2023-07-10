@@ -10,20 +10,21 @@ import EnemyHP from './components/EnemyHP';
 import HeroHP from './components/HeroHP';
 import MainInput from './components/MainInput';
 import Round from './components/Round';
-import Stopwatch from './components/Stopwatch';
 import PlayButton from './components/PlayButton';
 import StatsButton from './components/StatsButton';
 import LogInButton from './components/LogInButton';
 import KeyboardOption from './components/KeyboardMenu';
+import Timer from './components/Timer';
 
 import words from './words/words'
 
 function App() {
-  
-//Запись рекорда в локал сторедж
-  let localValue = localStorage.getItem('record');
 
-//конец игры переключатель
+  
+  //Запись рекорда в локал сторедж
+  let localValue = localStorage.getItem('record');
+  
+  //конец игры переключатель
   const [showEndGame, setShowEndGame] = useState(true);
   const handleEndGame = () => {
     setShowEndGame(true);
@@ -31,13 +32,16 @@ function App() {
   const handleEndGameOn = () => {
     setShowEndGame(false);
   };
-
+  
   
   //номер раунда
   const [countRound, setCountRound] = useState(1)
   
   //слово, которое нужно ввести
   const [ranWord, setRanWord] = useState(words[Math.floor(Math.random() * words.length)])
+
+  //длина прошлого слово, которое нужно было ввести
+  const [pastRanWord, setPastRanWord] = useState(1)
   
   //номер противника и его же уровень
   const [enemyNumber, setEnemyNumber] = useState(1)
@@ -45,8 +49,6 @@ function App() {
   //аттака противника
   const [enemyAttak, setEnemyAttak] = useState(enemyNumber*0.3)
   
-  //секунды
-  const [seconds, setSeconds] = useState(-3);
   
   
   
@@ -70,7 +72,7 @@ function App() {
   
   
   //HP героя
-  const [heroMaxCount, setHeroMaxCount] = useState(5)
+  const [heroMaxCount, setHeroMaxCount] = useState(50000)
   const [heroCount, setHeroCount] = useState(heroMaxCount)
   function incrementHero() {
     setHeroCount(heroCount + 1)
@@ -83,22 +85,23 @@ function App() {
   const [heroNewRecord, setHeroNewRecord] = useState(0)
   
   //значение инпута
-    const [inputValue, setInputValue] = useState()
+  const [inputValue, setInputValue] = useState('')
   //передача набранного текста в значение инпута
-    const handleInputChange = (event) => {
-      setInputValue(event.target.value);
-    }
-
-//удар героя
+  const handleInputChange = (event) => {
+    setInputValue(event.target.value);
+  }
+  
+  //удар героя
   const [heroAttak, setHeroAttak] = useState(1)
-//событие, когда я ввел нужно слово
+  //событие, когда я ввел нужно слово
   const inputEnterPress = (event) => {
     
     if ((inputValue == ranWord)) {
       setEnemyCount(prevEnemyCount => prevEnemyCount - heroAttak);
       setCountRound(prevCountRound => prevCountRound + 1);
       setInputValue('');
-      setRanWord(words[Math.floor(Math.random() * words.length)])
+      setPastRanWord(ranWord.length)
+      setRanWord(words[Math.floor(Math.random() * words.length)]);
       if ((enemyCount - heroAttak) <= 0) {
         //очко в зачет героя
         setHeroNewRecord(heroNewRecord + enemyNumber);
@@ -107,15 +110,19 @@ function App() {
         //увеличивается урон противника
         setEnemyAttak(prevEnemyAttak => prevEnemyAttak + enemyNumber*0.3);
         //меняется имя противника
-        //сбрасывается таймер
-        setSeconds(seconds => 0);
         //смена бекграунда противника
         setRandomColor(getRandomColor());
         //смена изображения противника
         //смена хп противника
         setEnemyMaxCount(enemyMaxCount + (enemyNumber*0.3));
         setEnemyCount(enemyMaxCount + (enemyNumber*0.3));
-      }
+      };
+      if (heroCount - enemyAttak <= 0) {
+        setShowEndGame(true);
+        handleEffectRunningOn();
+      } else {
+        setHeroCount((prevHeroCount) => prevHeroCount - enemyAttak);
+      };
     } 
   }
   
@@ -128,7 +135,6 @@ function App() {
       localStorage.setItem('record', heroNewRecord)
     }
     setHeroCount(heroMaxCount);
-    setSeconds(-3);
     setEnemyNumber(1);
     setEnemyAttak(enemyNumber*0.3);
     setEnemyMaxCount(1);
@@ -137,37 +143,9 @@ function App() {
     setHeroNewRecord(0);
   };
   
-  //секундомер с какой-то частью размонтироватия
-  useEffect(() => {
-    
-    let currentSeconds = 0; // Промежуточная переменная для хранения текущего значения seconds
-    
-    if (isEffectRunning) {
-      // Интервал для увеличения счетчика каждую секунду
-      const interval = setInterval(() => {
-        setSeconds((prevSeconds) => {
-          currentSeconds = prevSeconds + 1; // Обновление значения currentSeconds
-          return currentSeconds;
-        });
-          
-        // Каждые 10 секунд наносится удар по Герою
-        if (currentSeconds % 10 === 0 && currentSeconds !== 0) {
-          if (heroCount - enemyAttak <= 0) {
-            setShowEndGame(true);
-            handleEffectRunningOn();
-          } else {
-            setHeroCount((prevHeroCount) => prevHeroCount - enemyAttak);
-          }
-        }
-        
-      }, 1000);
-      
-      // Очистка интервала при размонтировании компонента
-      return () => clearInterval(interval);
-    }
-  }, [enemyAttak, heroCount, heroMaxCount, isEffectRunning]);
-
-
+  
+  
+  
   //Генератор цвета противника
   function getRandomColor() {
     // Генерация случайного значения от 0 до 255 для каждой компоненты RGB
@@ -188,7 +166,26 @@ function App() {
   // В компоненте
   const [randomColor, setRandomColor] = useState(getRandomColor());
   
+  //Timer
+  
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [pastElapsedTime, setPastElapsedTime] = useState(elapsedTime);
 
+  useEffect(() => {  
+
+    
+    if (!!inputValue) {
+      const intervalId = setInterval(() => {
+        setElapsedTime((prevElapsedTime) => prevElapsedTime + 1);
+      }, 1);
+      
+      return () => clearInterval(intervalId);
+    } else {
+    setPastElapsedTime(elapsedTime)
+    setElapsedTime(0);
+    }
+  }, [inputValue]);
+  
   // Вывод значений в консоль разработчика
   console.log("______________________________");
   //console.log("Value of ranWord:", ranWord);
@@ -198,7 +195,8 @@ function App() {
   console.log("Enemy ATK:", enemyAttak);
   console.log("End Game:", showEndGame);
   console.log("Value of inputValue:", inputValue);
-  console.log("Seconds:", seconds);
+  console.log("Value of inputValue:", typeof(inputValue));
+  console.log("Value of inputValue:", !!inputValue);
   console.log("HeroHP:", heroCount);
   //console.log("EnemyColor:", randomColor, typeof randomColor);
   
@@ -258,17 +256,26 @@ function App() {
                 />
               </div>
             </div> 
-            <div name='log' className="bg-fight text-white flex flex-col justify-end items-center">
+            <div name='log' className="bg-fight text-white flex flex-col justify-start items-center">
+              <div name='main-input-block' className="bg-green-100 text-black">
+                <MainInput 
+                  ranWord={ranWord} 
+                  inputEnterPress={inputEnterPress}
+                  inputValue={inputValue}
+                  handleInputChange={handleInputChange}
+                />
+              </div>
+
               <Round 
+                elapsedTime={elapsedTime}
+                pastElapsedTime={pastElapsedTime}
+                pastRanWord={pastRanWord}
                 countRound={countRound} 
                 ranWord={ranWord} 
                 inputEnterPress={inputEnterPress}
                 enemyNumber={enemyNumber}
               />
-              <Stopwatch 
-                seconds={seconds}
-                setSeconds={setSeconds}  
-              />
+              
             </div> 
             <div name='enemy' className="bg-[#ff7fff]/50 flex flex-col items-center">
               <div 
@@ -290,14 +297,7 @@ function App() {
               </div>
             </div>     
           </div>
-          <div name='main-input-block' className="bg-green-100">
-            <MainInput 
-              ranWord={ranWord} 
-              inputEnterPress={inputEnterPress}
-              inputValue={inputValue}
-              handleInputChange={handleInputChange}
-            />
-          </div>
+
           <div name='main-keyboard' className="bg-black text-white">
             <KeyboardOption
             

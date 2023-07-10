@@ -1,10 +1,14 @@
-const Round = function ({countRound, ranWord, enemyNumber}) {
+const Round = function ({elapsedTime, pastElapsedTime, pastRanWord, countRound, ranWord, enemyNumber}) {
 
     return (
-        <>
-            <h1 className="">Противник {enemyNumber}</h1>
-            <h1 className="">Раунд {countRound}</h1>
-            <h2 className="">Для атаки введи "{ranWord}"</h2>
+        <>            
+            <h1 className=""> - "{ranWord}" Атака</h1>
+            <h1 className=""> - "{ranWord}" Лечение</h1>
+            <h3 className="">Противник {enemyNumber}</h3>
+            <h3 className="">Раунд {countRound}</h3>
+            <h3 className="">мультипликатор <br />
+            {pastElapsedTime / pastRanWord}</h3>
+            <h3 className="">timer {elapsedTime}</h3>
         </>
     )
 }
