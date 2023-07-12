@@ -6,7 +6,7 @@ import butrpgpushplay from '../media/button-rpg-push-play.png';
 //<img className="hidden" src={butrpgfocusplay} alt='Кнопка плей при наведении' />
 //<img className="hidden" src={butrpgpushplay} alt='Кнопка плей при нажатии' />
 
-function PlayButton({handleEndGame, handleEndGameOn, handleEffectRunningOn}) {
+function PlayButton({handleEndGame, handleMap, handleStartPage}) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => {
@@ -21,9 +21,20 @@ function PlayButton({handleEndGame, handleEndGameOn, handleEffectRunningOn}) {
       </button>
       {isMenuOpen && (
         <div className="text-white flex flex-col justify-start items-start">
-          <button className="text-white bg-green-300">- Новичек</button>
-          <button name='newSandBoxGame' className="bg-green-400" onClick={ () => {handleEndGameOn(); handleEffectRunningOn(); }}>- Опытный (new sand box game)</button>
-          <button name='end' className="bg-green-400" onClick={ () => {handleEndGame(); handleEffectRunningOn(); }}>- Конец игры</button>
+          <button 
+            name='newSandBoxGame' 
+            className="bg-green-400" 
+            onClick={ 
+              () => {handleMap(true); handleEndGame(false); handleStartPage(false);}}>
+            - new sand box game
+          </button>
+          <button 
+            name='end' 
+            className="bg-green-400" 
+            onClick={
+             () => {handleEndGame(true); handleMap(false); handleStartPage(false);}}>
+            - Конец игры
+          </button>
         </div>
       )}
     </div>

@@ -7,7 +7,7 @@ const Round = function ({elapsedTime, pastElapsedTime, pastRanWord, countRound, 
             <h3 className="">Противник {enemyNumber}</h3>
             <h3 className="">Раунд {countRound}</h3>
             <h3 className="">мультипликатор <br />
-            {pastElapsedTime / pastRanWord}</h3>
+            {(elapsedTime / pastRanWord / 1000).toFixed(3)}</h3>
             <h3 className="">timer {elapsedTime}</h3>
         </>
     )

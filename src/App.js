@@ -14,46 +14,46 @@ import PlayButton from './components/PlayButton';
 import StatsButton from './components/StatsButton';
 import LogInButton from './components/LogInButton';
 import KeyboardOption from './components/KeyboardMenu';
+import RoomButton from './components/RoomButton';
 import Timer from './components/Timer';
 
 import words from './words/words'
 
 function App() {
-
+  
   
   //Запись рекорда в локал сторедж
   let localValue = localStorage.getItem('record');
-  
-  //конец игры переключатель
-  const [showEndGame, setShowEndGame] = useState(true);
-  const handleEndGame = () => {
-    setShowEndGame(true);
-  };
-  const handleEndGameOn = () => {
-    setShowEndGame(false);
-  };
-  
-  
+  //
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [pastElapsedTime, setPastElapsedTime] = useState(elapsedTime);
   //номер раунда
   const [countRound, setCountRound] = useState(1)
-  
   //слово, которое нужно ввести
   const [ranWord, setRanWord] = useState(words[Math.floor(Math.random() * words.length)])
-
   //длина прошлого слово, которое нужно было ввести
-  const [pastRanWord, setPastRanWord] = useState(1)
-  
+  const [pastRanWord, setPastRanWord] = useState(ranWord.length)
   //номер противника и его же уровень
   const [enemyNumber, setEnemyNumber] = useState(1)
-  
   //аттака противника
-  const [enemyAttak, setEnemyAttak] = useState(enemyNumber*0.3)
-  
-  
-  
-  
-  
-  
+  const [enemyAttak, setEnemyAttak] = useState(enemyNumber*0.3);
+  //переключатель главной страницы
+  const [showStartPage, setShowStartPage] = useState(true);
+  const handleStartPage = (value) => {
+    value ? setShowStartPage(true) : setShowStartPage(false);
+  };
+  //переключатель карты
+  const [showMap, setShowMap] = useState(false);
+  const handleMap = (value) => {
+    value ? setShowMap(true) : setShowMap(false);
+  }
+  //конец игры переключатель
+  const [showEndGame, setShowEndGame] = useState(false);
+  const handleEndGame = (value) => {
+    value ? (setShowEndGame(true) && handleHeroIsDead()) : (setShowEndGame(false));
+  };
+  // В компоненте
+  const [randomColor, setRandomColor] = useState(getRandomColor());
   //HP противника (должно быть противника)
   const [enemyCount, setEnemyCount] = useState(1)
   const [enemyMaxCount, setEnemyMaxCount] = useState(1)
@@ -63,16 +63,15 @@ function App() {
   function decrement() {
     setEnemyCount(enemyCount - 1)
   }
-  
-  
-  
-  
+
   //const [en, seten] = useState({sem: 1, sam: 2})
   //en.sem бу равно 1
-  
+
+  //удар героя
+  const [heroAttak, setHeroAttak] = useState(1)
   
   //HP героя
-  const [heroMaxCount, setHeroMaxCount] = useState(50000)
+  const [heroMaxCount, setHeroMaxCount] = useState(50)
   const [heroCount, setHeroCount] = useState(heroMaxCount)
   function incrementHero() {
     setHeroCount(heroCount + 1)
@@ -80,10 +79,9 @@ function App() {
   function decrementHero() {
     setHeroCount(heroCount - 1)
   }
-  
+
   //Рекорд героя
   const [heroNewRecord, setHeroNewRecord] = useState(0)
-  
   //значение инпута
   const [inputValue, setInputValue] = useState('')
   //передача набранного текста в значение инпута
@@ -91,18 +89,19 @@ function App() {
     setInputValue(event.target.value);
   }
   
-  //удар героя
-  const [heroAttak, setHeroAttak] = useState(1)
   //событие, когда я ввел нужно слово
   const inputEnterPress = (event) => {
     
-    if ((inputValue == ranWord)) {
-      setEnemyCount(prevEnemyCount => prevEnemyCount - heroAttak);
+    if ((inputValue === ranWord)) {
+      setPastRanWord(ranWord.length);
+      setPastElapsedTime(elapsedTime);
+      console.log('elapsedTime:', elapsedTime);
+      setEnemyCount(prevEnemyCount => prevEnemyCount - (heroAttak - (elapsedTime/pastRanWord/1000)));
       setCountRound(prevCountRound => prevCountRound + 1);
       setInputValue('');
-      setPastRanWord(ranWord.length)
       setRanWord(words[Math.floor(Math.random() * words.length)]);
-      if ((enemyCount - heroAttak) <= 0) {
+      //если герой убивает противника за один удар
+      if ((enemyCount - (heroAttak - (elapsedTime/pastRanWord/1000))) <= 0) {
         //очко в зачет героя
         setHeroNewRecord(heroNewRecord + enemyNumber);
         //меняется номер противника
@@ -116,19 +115,26 @@ function App() {
         //смена хп противника
         setEnemyMaxCount(enemyMaxCount + (enemyNumber*0.3));
         setEnemyCount(enemyMaxCount + (enemyNumber*0.3));
+        handleMap(true);
       };
-      if (heroCount - enemyAttak <= 0) {
-        setShowEndGame(true);
-        handleEffectRunningOn();
+      //если противник убивает героя за один удар
+      if (heroCount - (enemyAttak + (elapsedTime/pastRanWord/1000)) <= 0) {
+        handleEndGame();
       } else {
-        setHeroCount((prevHeroCount) => prevHeroCount - enemyAttak);
+        setHeroCount((prevHeroCount) => prevHeroCount - (enemyAttak + (elapsedTime/pastRanWord/1000)));
       };
-    } 
+    }
+    console.log('_____________________________');
+    console.log("EnemyHP:", enemyCount);
+    console.log("EnemyHP - heroATK:",enemyCount - (heroAttak - (elapsedTime/pastRanWord/1000)));
+    console.log('hero ATK:', heroAttak - (elapsedTime/pastRanWord/1000));
+    console.log('elapsedTime/pastRanWord/1000:', elapsedTime/pastRanWord/1000);
+    console.log('elapsedTime:', elapsedTime);
+    console.log('pastRanWord:', pastRanWord); 
   }
   
-  const [isEffectRunning, setIsEffectRunning] = useState(false);
-  const handleEffectRunningOn = () => {
-    setIsEffectRunning((prevValue) => !prevValue);
+  //обновление значений героя при конце игры
+  const handleHeroIsDead = () => {
     if (localStorage.getItem('record') === null) {
       localStorage.setItem('record', heroNewRecord)
     } else if (localStorage.getItem('record') < heroNewRecord) {
@@ -163,17 +169,8 @@ function App() {
     return color;
   }
   
-  // В компоненте
-  const [randomColor, setRandomColor] = useState(getRandomColor());
-  
   //Timer
-  
-  const [elapsedTime, setElapsedTime] = useState(0);
-  const [pastElapsedTime, setPastElapsedTime] = useState(elapsedTime);
-
   useEffect(() => {  
-
-    
     if (!!inputValue) {
       const intervalId = setInterval(() => {
         setElapsedTime((prevElapsedTime) => prevElapsedTime + 1);
@@ -181,25 +178,29 @@ function App() {
       
       return () => clearInterval(intervalId);
     } else {
-    setPastElapsedTime(elapsedTime)
+
     setElapsedTime(0);
     }
   }, [inputValue]);
   
   // Вывод значений в консоль разработчика
-  console.log("______________________________");
+  // console.log("______________________________");
   //console.log("Value of ranWord:", ranWord);
-  console.log("localValue:", localValue);
-  console.log("EnemyHP:", enemyCount);
-  console.log("Enemy Max HP:", enemyMaxCount);
-  console.log("Enemy ATK:", enemyAttak);
-  console.log("End Game:", showEndGame);
-  console.log("Value of inputValue:", inputValue);
-  console.log("Value of inputValue:", typeof(inputValue));
-  console.log("Value of inputValue:", !!inputValue);
-  console.log("HeroHP:", heroCount);
-  //console.log("EnemyColor:", randomColor, typeof randomColor);
-  
+  // console.log("localValue:", localValue);
+  // console.log("EnemyHP:", enemyCount);
+  // console.log("EnemyHP - heroATK:",enemyCount - (heroAttak - (pastElapsedTime/pastRanWord/1000)));
+  // console.log("Enemy Max HP:", enemyMaxCount);
+  // console.log("Enemy ATK:", enemyAttak);
+  // console.log("End Game:", showEndGame);
+  // console.log("Value of inputValue:", inputValue);
+  // console.log("Value of inputValue:", typeof(inputValue));
+  // console.log("Value of inputValue:", !!inputValue);
+  // console.log("HeroHP:", heroCount);
+  // //console.log("EnemyColor:", randomColor, typeof randomColor);
+  // console.log('hero ATK:', heroAttak - (pastElapsedTime/pastRanWord/1000));
+  // console.log('pastElapsedTime/pastRanWord/1000:', pastElapsedTime/pastRanWord/1000);
+  // console.log('pastElapsedTime:', pastElapsedTime);
+  // console.log('pastRanWord:', pastRanWord);
   
   
   //<header className="bg-[#998414]
@@ -209,13 +210,19 @@ function App() {
 
       <header className="m-5 bg-stone-bg flex flex-row justify-around items-center">
         <div name='logo' className="w-1/3">
-            <img src={logo} alt='Логотип'/>
+            <img 
+              src={logo} 
+              onClick={ 
+                () => {handleMap(false); handleEndGame(false); handleStartPage(true);}
+              } 
+              alt='Логотип'
+            />
         </div>
         <div name='play-menu-button' className="w-1/5">
           <PlayButton
             handleEndGame={handleEndGame}
-            handleEndGameOn={handleEndGameOn}
-            handleEffectRunningOn={handleEffectRunningOn}
+            handleMap={handleMap}
+            handleStartPage={handleStartPage}
           />
         </div>
         <div name='stats-menu-button' className="w-1/5">
@@ -231,7 +238,61 @@ function App() {
       </header>
 
       <main className="p-3 m-5 bg-metal-stone flex flex-col items-center">
-        {showEndGame ? (
+        {showStartPage ? (
+        <>
+        Это стартовая страница
+        </>
+        ) : (showMap ? (
+        <>
+          <p>Это экран карты, где ты выбираешь, куда тебе идти</p>
+          <div name='input'>
+
+          </div>
+          <div name='map-lvls' className='flex flex-row justify-center items-center'>
+            <div>
+              <button className='bg-red-100'>
+                <RoomButton
+                  handleEndGame={handleEndGame}
+                  handleMap={handleMap}
+                  handleStartPage={handleStartPage} 
+                />
+              </button>
+            </div>
+            <div className='flex flex-col'>
+              <button className='bg-red-200'>
+                <RoomButton
+                  handleEndGame={handleEndGame}
+                  handleMap={handleMap}
+                  handleStartPage={handleStartPage} 
+                />
+              </button>
+              <button className='bg-red-300'>
+                <RoomButton
+                  handleEndGame={handleEndGame}
+                  handleMap={handleMap}
+                  handleStartPage={handleStartPage} 
+                />
+              </button>
+              <button className='bg-red-400'>
+                <RoomButton
+                  handleEndGame={handleEndGame}
+                  handleMap={handleMap}
+                  handleStartPage={handleStartPage} 
+                />
+              </button>
+            </div>
+            <div>
+              <button className='bg-red-500'>
+                <RoomButton
+                  handleEndGame={handleEndGame}
+                  handleMap={handleMap}
+                  handleStartPage={handleStartPage} 
+                />
+              </button>
+            </div>
+          </div>
+        </>
+        ) : (showEndGame ? (
         <>
           <p>End of the Game</p>
           <p>Ваш лучший результат:</p>
@@ -303,8 +364,7 @@ function App() {
             
             />
           </div>
-        </>
-        )}    
+        </>)))} 
       </main>
 
       <footer className="m-5 bg-blue-200">
