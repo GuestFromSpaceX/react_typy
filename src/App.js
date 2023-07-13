@@ -119,7 +119,8 @@ function App() {
       };
       //если противник убивает героя за один удар
       if (heroCount - (enemyAttak + (elapsedTime/pastRanWord/1000)) <= 0) {
-        handleEndGame();
+        handleEndGame(true);
+        handleMap(false);
       } else {
         setHeroCount((prevHeroCount) => prevHeroCount - (enemyAttak + (elapsedTime/pastRanWord/1000)));
       };
@@ -297,7 +298,11 @@ function App() {
           <p>End of the Game</p>
           <p>Ваш лучший результат:</p>
           <p>{localStorage.getItem('record')}</p>
-          <button>Добавить </button>
+          <button 
+            onClick={
+              () => {handleEndGame(true); handleMap(false); handleStartPage(true)}}>
+            Нажми на меня для возвращения на стартовую страницу 
+          </button>
         </>
         ) : (
         <>
